@@ -1,0 +1,69 @@
+--- course/lib.php	2012-11-01 12:40:44.000000000 +0500
++++ course/lib.php	2012-11-01 12:42:36.322757789 +0500
+@@ -4097,66 +4097,6 @@ function create_course($data, $editoropt
+     // Trigger events
+     events_trigger('course_created', $course);
+ 
+-	  //Added By Hina Yousuf to automatically add attendance activity
+-
+-
+-    if ($attendances = $DB->get_records_select("attforblock", "course = ? ", array($course->id, $type), "id ASC")) {
+-        // There should always only be ONE, but with the right combination of
+-        // errors there might be more.  In this case, just return the oldest one (lowest ID).
+-        foreach ($attendances as $attendance) {
+-            return $attendance;   // ie the first one
+-        }
+-    }
+-    $courserecord=$DB->get_record("course", array("id" => "$course->id"));
+-    //saving the attendance in db 
+-
+-
+-
+-                $attendance->id = '';
+-                $attendance->course = $course->id;
+-                $attendance->name  = "Attendance";
+-            $attendance->grade = 0;
+-                $attendanceid = $DB->insert_record("attforblock", $attendance);
+-         //       print_r($attendance);
+-		if (!$DB->get_records('attendance_statuses', array('courseid'=>$course->id))) {
+-		$statuses = $DB->get_records('attendance_statuses', array('courseid'=>0), 'id');
+-		foreach($statuses as $stat) {
+-			$rec = $stat;
+-			$rec->courseid = $course->id;
+-			$DB->insert_record('attendance_statuses', $rec);
+-		}
+-	}
+-                $attendance->id = $attendanceid;
+-
+-                if (! $module = $DB->get_record("modules", array("name" => "attforblock"))) {
+-                        echo $OUTPUT->notification("Could not find attendance module!!");
+-                        return false;
+-                }
+-                $mod = new stdClass();
+-                $mod->course = $course->id;
+-                $mod->module = $module->id;
+-                $mod->instance = $attendance->id;
+-                $mod->section = 0;
+-
+-                if (! $mod->coursemodule = add_course_module($mod) ) {   // assumes course/lib.php is loaded
+-		 echo $OUTPUT->notification("Could not add a new course module to the course '" . $courseid . "'");
+-                        return false;
+-                }
+-                if (! $sectionid = add_mod_to_section($mod) ) {   // assumes course/lib.php is loaded
+-                        echo $OUTPUT->notification("Could not add the new course module to that section");
+-                        return false;
+-                }
+-                $DB->set_field("course_modules", "section", $sectionid, array("id" => $mod->coursemodule));
+-
+-
+-
+-
+-
+-
+-
+-    //end
+-
+-
+     return $course;
+ }
+ 
